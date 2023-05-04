@@ -1,20 +1,29 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { useFonts } from 'expo-font';
+import * as splashScreen from 'expo-splash-screen';
+import { useCallback } from 'react';
+import { Fonts } from './constants';
+import AppNavigator from './navigation/AppNavigator';
+import { store } from './store/store';
+import { Provider } from 'react-redux';
+
+splashScreen.preventAutoHideAsync();
 
 export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
-}
+	const [fontsLoaded] = useFonts(Fonts);
+	const onLayoutRootView = useCallback(async () => {
+		if (fontsLoaded) {
+			await splashScreen.hideAsync();
+			console.log('fonts loaded');
+		}
+	}, [fontsLoaded]);
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+	if (!fontsLoaded) {
+		return null;
+	}
+
+	return (
+		<Provider store={store}>
+			<AppNavigator onLayout={onLayoutRootView} />
+		</Provider>
+	);
+}
